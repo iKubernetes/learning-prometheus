@@ -88,15 +88,5 @@ There are 3 basic alerts that have been added to this stack.
 
 To get alerts sent to you, follow the directions in the [Alert Configuration Section](#alert-configuration).
 
-### Test Alerts
-A quick test for your alerts is to simulate high CPU load. Run the utility script `./util/high-load.sh` and about 30 seconds or so later you should notice the incident created in [PagerTree](https://pagertree.com) (assuming you followed the [Alert Configuration Section](#alert-configuration) and you'll also get notifications.
-
-Then `Ctrl+C` to stop this command. The incident should auto resolve in PagerTree.
-
-# Security Considerations
-This project is intended to be a quick-start to get up and running with Docker and Prometheus. Security has not been implemented in this project. It is the users responsibility to implement Firewall/IpTables and SSL.
-
-Since this is a template to get started Prometheus and Alerting services are exposing their ports to allow for easy troubleshooting and understanding of how the stack works.
-
 # Troubleshooting
 It appears some people have reported no data appearing in Grafana. If this is happening to you be sure to check the time range being queried within Grafana to ensure it is using Today's date with current time.
