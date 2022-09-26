@@ -1,0 +1,7 @@
+- targets:
+  - http://www.magedu.com
+  - http://www.prometheus.io
+  - http://www.google.com
+  labels:
+    app: blackbox
+    job: blackbox

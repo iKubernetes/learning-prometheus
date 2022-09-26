@@ -53,3 +53,55 @@ services:
     networks:
       - monitoring
     restart: always
+
+  consul-exporter:
+    image: prom/consul-exporter:v0.8.0
+    networks:
+      - monitoring
+    ports:
+      - 9107:9107
+    command:
+      - "--consul.server=consul:8500"
+    restart: always
+
+  grafana:
+    image: grafana/grafana:9.0.9
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - config.monitoring
+    networks:
+      - monitoring
+    restart: always
+
+  blackbox_exporter:
+    image: prom/blackbox-exporter:v0.22.0
+    volumes:
+      - ./blackboxexporter/:/etc/blackboxexporter/
+    command:
+      - '--config.file=/etc/blackboxexporter/config.yml'
+    networks:
+      - monitoring
+    ports:
+      - 9115:9115
+    restart: always
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - monitoring
+    restart: always
+    ports:
+      - 9093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=debug'

@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "id": "consul-exporter",
+      "name": "consul-exporter",
+      "address": "consul-exporter",
+      "port": 9107,
+      "tags": ["consul-exporter"],
+      "checks": [{
+        "http": "http://consul-exporter:9107/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}

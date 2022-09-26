@@ -21,16 +21,21 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.enable-lifecycle'
-    links:
-      - cadvisor:cadvisor
-      - alertmanager:alertmanager
-    depends_on:
-      - cadvisor
     networks:
       - monitoring
     ports:
       - 9090:9090
     restart: always
+
+  consul:
+    image: consul:1.13
+    volumes:
+      - ./consul_configs:/consul/config
+    networks:
+      - monitoring
+    ports:
+      - 8500:8500
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
     image: prom/node-exporter:v1.3.1
@@ -41,40 +46,22 @@ services:
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--path.rootfs=/rootfs'
     ports:
       - 9100:9100
     networks:
       - monitoring
     restart: always
 
-  alertmanager:
-    image: prom/alertmanager:v0.24.0
-    volumes:
-      - ./alertmanager/:/etc/alertmanager/
+  consul-exporter:
+    image: prom/consul-exporter:v0.8.0
     networks:
       - monitoring
-    restart: always
     ports:
-      - 9093:9093
+      - 9107:9107
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-      - '--log.level=debug'
-
-  cadvisor:
-    image: google/cadvisor:v0.33.0
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    networks:
-      - monitoring
-    ports:
-      - 8080:8080
-    restart: always
+      - "--consul.server=consul:8500"
 
   grafana:
     image: grafana/grafana:9.0.9
@@ -90,15 +77,3 @@ services:
       - config.monitoring
     networks:
       - monitoring
-
-  blackbox_exporter:
-    image: prom/blackbox-exporter:v0.22.0
-    volumes:
-      - ./blackboxexporter/:/etc/blackboxexporter/
-    command:
-      - '--config.file=/etc/blackboxexporter/config.yml'
-    networks:
-      - monitoring
-    ports:
-      - 9115:9115
-    restart: always

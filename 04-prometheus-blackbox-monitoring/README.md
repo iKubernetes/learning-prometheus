@@ -1,22 +1,3 @@
-# Contents
-
-* [Overview](#a-prometheus--grafana-docker-compose-stack)
-* [Pre-requisites](#pre-requisites)
-* [Installation & Configuration](#installation--configuration)
-   * [Post Configuration](#post-configuration)
-      * [Datasource Configuration](#datasource-configuration)
-      * [Ping Configuration](#ping-configuration)
-      * [Alert Configuration](#alert-configuration)
-* [Dashboards](#dashboards)
-    * [Ping Dashboard](#ping-dashboard)
-    * [System Monitoring Dashboard](#system-monitoring-dashboard)
-* [Test Alerts](#test-alerts)
-* [Utility Scripts](#utility-scripts)
-* [Security Considerations](#security-considerations)
-   * [Production Security](#production-security)
-* [Troubleshooting](#troubleshooting)
-   * [Mac Users](#mac-users)
-
 # A Prometheus & Grafana docker-compose stack
 
 Here's a quick start to stand-up a [Prometheus](http://prometheus.io/) stack containing Prometheus, [Grafana](https://grafana.com/) and to monitor website uptime.

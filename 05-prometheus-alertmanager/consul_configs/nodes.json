@@ -13,12 +13,12 @@
     },
     {
       "id": "node_exporter-node02",
-      "name": "k8s-node02",
-      "address": "172.29.6.12",
+      "name": "node02",
+      "address": "172.29.1.12",
       "port": 9100,
       "tags": ["nodes"],
       "checks": [{
-        "http": "http://172.29.6.12:9100/metrics",
+        "http": "http://172.29.1.12:9100/metrics",
         "interval": "5s"
       }]
     },

@@ -1,0 +1,24 @@
+modules:
+  # https://github.com/prometheus/blackbox_exporter/blob/master/example.yml
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_http_versions: 
+      - "HTTP/1.1"
+      - "HTTP/2"
+      valid_status_codes: []  # Defaults to 2xx
+      enable_http2: false
+      method: GET
+      no_follow_redirects: false
+      # fail_if_ssl为true时，表示如果站点启用了SSL则探针失败，反之成功; 
+      # fail_if_not_ssl刚好相反;
+      fail_if_ssl: false
+      fail_if_not_ssl: false
+      #  fail_if_body_matches_regexp, fail_if_body_not_matches_regexp, fail_if_header_matches, fail_if_header_not_matches
+      #  可以定义一组正则表达式，用于验证HTTP返回内容是否符合或者不符合正则表达式的内容
+      fail_if_body_matches_regexp:
+        - "Could not connect to database"
+      tls_config:
+        insecure_skip_verify: false
+      preferred_ip_protocol: "ip4" # defaults to "ip6"
