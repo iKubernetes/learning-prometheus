@@ -3,22 +3,22 @@
     {
       "id": "node_exporter-node01",
       "name": "node01",
-      "address": "172.29.1.11",
+      "address": "172.29.6.11",
       "port": 9100,
       "tags": ["nodes"],
       "checks": [{
-        "http": "http://172.29.1.11:9100/metrics",
+        "http": "http://172.29.6.11:9100/metrics",
         "interval": "5s"
       }]
     },
     {
       "id": "node_exporter-node02",
       "name": "node02",
-      "address": "172.29.1.12",
+      "address": "172.29.6.12",
       "port": 9100,
       "tags": ["nodes"],
       "checks": [{
-        "http": "http://172.29.1.12:9100/metrics",
+        "http": "http://172.29.6.12:9100/metrics",
         "interval": "5s"
       }]
     },
