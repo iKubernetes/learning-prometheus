@@ -1,0 +1,59 @@
+# my global config
+# Author: MageEdu <mage@magedu.com>
+# Repo: http://gitlab.magedu.com/MageEdu/prometheus-configs/
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    consul_sd_configs:
+    - server: "172.29.1.11:8500"
+      tags:
+      - "prometheus"
+      refresh_interval: 2m 
+
+  # All nodes
+  - job_name: 'nodes'
+    consul_sd_configs:
+    - server: "172.29.1.11:8500"
+      tags:
+      - "nodes"
+      refresh_interval: 2m 
+
+    relabel_configs:
+    - source_labels:
+      - __scheme__
+      - __address__
+      - __metrics_path__
+      regex: "(http|https)(.*)"
+      separator: ""
+      target_label: "endpoint"
+      replacement: "${1}://${2}"
+      action: replace
+
+    metric_relabel_configs:
+    - source_labels:
+      - __name__
+      regex: "go_info.*"
+      action: drop

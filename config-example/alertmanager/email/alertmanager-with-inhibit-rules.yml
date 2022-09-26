@@ -1,0 +1,29 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  #group_by: ['alertname']
+  #group_wait: 30s
+  #group_interval: 30s
+  repeat_interval: 10s
+  receiver: 'email-me'
+
+receivers:
+- name: 'email-me'
+  email_configs:
+  - to: 'devops@magedu.com'
+    from: 'devops@magedu.com'
+    smarthost: 'smtp.exmail.qq.com:465'
+    auth_username: 'devops@magedu.com'
+    auth_identity: 'devops@magedu.com'
+    auth_password: 'Mage123'
+    require_tls: false
+inhibit_rules:
+- source_match:
+    alertname: InstanceDown
+    severity: critical
+  target_match:
+    alertname: InstanceDown
+    severity: critical
+  equal:
+    - instance

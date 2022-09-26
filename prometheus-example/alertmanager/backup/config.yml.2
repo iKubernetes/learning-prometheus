@@ -1,0 +1,31 @@
+global:
+    resolve_timeout: 1m
+    smtp_smarthost: 'smtp.qq.com:465'
+    smtp_from: 'ikubernetes@qq.com'
+    smtp_auth_username: 'ikubernetes@qq.com'
+    smtp_auth_password: 'egnvzqffqjsjcaec'
+    smtp_hello: '@qq.com'
+    smtp_require_tls: false
+
+route:
+    group_by: ['group', 'job', 'alertname'] 
+    group_wait: 10s
+    group_interval: 2m
+    repeat_interval: 5m
+
+    #receiver: default-receiver
+    receiver: wechat
+
+ # 定义接收者
+receivers:
+- name: 'default-receiver'
+  email_configs:
+    - to: 'mage@magedu.com'
+      send_resolved: true 
+- name: 'wechat'
+  wechat_configs:
+    - corp_id: ww3ce05f17e0b10eb2
+      to_user: '@all'
+      agent_id: 1000003
+      api_secret: uG8M4iEYFLMBHjonCufWfeJX2CRS9l_fKbUdkRHDjxc
+      send_resolved: true

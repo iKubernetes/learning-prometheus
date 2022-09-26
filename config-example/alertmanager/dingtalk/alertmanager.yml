@@ -1,0 +1,32 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'severity', 'namespace']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 10s
+  receiver: 'dingding.webhook1'
+  routes:
+  - receiver: 'dingding.webhook1'
+    match:
+      team: DevOps
+    group_wait: 10s
+    group_interval: 15s
+    repeat_interval: 3h
+  - receiver: 'dingding.webhook.all'
+    match:
+      team: SRE
+    group_wait: 10s
+    group_interval: 15s
+    repeat_interval: 3h
+
+receivers:
+- name: 'dingding.webhook1'
+  webhook_configs:
+  - url: 'http://172.29.1.11:8060/dingtalk/webhook1/send'
+    send_resolved: true
+- name: 'dingding.webhook.all'
+  webhook_configs:
+  - url: 'http://172.29.1.11:8060/dingtalk/webhook_mention_all/send'
+    send_resolved: true

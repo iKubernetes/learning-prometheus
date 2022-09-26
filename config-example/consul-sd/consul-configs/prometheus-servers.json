@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "id": "prometheus-server-node01",
+      "name": "prom-server-node01",
+      "address": "172.29.1.11",
+      "port": 9090,
+      "tags": ["prometheus"],
+      "checks": [{
+        "http": "http://172.29.1.11:9090/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}

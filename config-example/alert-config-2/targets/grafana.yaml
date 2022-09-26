@@ -1,0 +1,4 @@
+- targets:
+  - 172.29.1.11:3000
+  labels:
+    app: grafana

@@ -1,0 +1,20 @@
+groups:
+- name: nodes_alerts
+  rules:
+  - alert: DiskWillFillIn12Hours
+    expr: predict_linear(node_filesystem_free_bytes{mountpoint="/"}[1h], 12*3600)
+    for: 1m
+    labels:
+      severity: critital
+    annotations:
+      discription: Disk on {{ $label.instance }} will fill in approximately 12 hours.
+
+- name: prometheus_alerts
+  rules:
+  - alert: PrometheusConfigReloadFailed
+    expr: prometheus_config_last_reload_successful == 0
+    for: 3m
+    labels:
+      serverity: warning
+    annotations:
+      description: Reloading Prometheus configuration has failed on {{ $labels.instance }}.

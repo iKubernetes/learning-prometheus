@@ -1,0 +1,16 @@
+{{ define "wechat.default.message" }}
+{{ range $i, $alert :=.Alerts }}
+===alertmanager监控报警===
+告警状态：{{   .Status }}
+告警级别：{{ $alert.Labels.severity }}
+告警类型：{{ $alert.Labels.alertname }}
+告警应用：{{ $alert.Annotations.summary }}
+故障主机: {{ $alert.Labels.instance }}
+告警主题: {{ $alert.Annotations.summary }}
+触发阈值：{{ $alert.Annotations.value }}
+告警详情: {{ $alert.Annotations.description }}
+触发时间: {{ $alert.StartsAt.Format "2006-01-02 15:04:05" }}
+===========end============
+{{ end }}
+{{ end }}
+

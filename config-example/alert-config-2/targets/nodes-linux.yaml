@@ -1,0 +1,7 @@
+- targets:
+  - 172.29.1.11:9100
+  - 172.29.1.12:9100
+  - 172.29.1.13:9100
+  labels:
+    app: node-exporter
+    job: node

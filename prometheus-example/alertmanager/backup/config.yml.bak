@@ -1,0 +1,30 @@
+global:
+    resolve_timeout: 1m
+    smtp_smarthost: 'smtp.qq.com:465'
+    smtp_from: 'monsys@magedu.com'
+    smtp_auth_username: 'monsys@magedu.com'
+    smtp_auth_password: ''
+    smtp_hello: '@qq.com'
+    smtp_require_tls: false
+
+    group_by: [alertname] #通过alertname的值对告警进行分类,- alert: 物理节点cpu使用率
+    group_wait: 10s #一组告警第一次发送之前等待的延迟时间，即产生告警后延迟10秒钟将组内新产生的消息一起合并发送(一般设置为0秒 ~ 几分钟)。
+    group_interval: 2m  #一组已发送过初始通知的告警接收到新告警后，下次发送通知前等待的延迟时间(一般设置为5分钟或更多)。
+    repeat_interval: 5m #一条成功发送的告警，在最终发送通知之前等待的时间(通常设置为3小时或更长时间)。
+
+    receiver: default-receiver
+    routes:
+    - receiver: myalertname
+      group_wait: 10s
+      match_re:
+        severity: critical
+
+receivers: #定义多接收者
+- name: 'default-receiver'
+    email_configs:
+    - to: 'rooroot@aliyun.com'
+      send_resolved: true #通知已经恢复的告警
+- name: myalertname
+    webhook_configs:
+    - url: 'http://ding_webhook:8060/dingtalk/alertname/send'
+      send_resolved: true

@@ -1,0 +1,45 @@
+# my global config
+# Author: MageEdu <mage@magedu.com>
+# Repo: http://gitlab.magedu.com/MageEdu/prometheus-configs/
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - file_sd_configs:
+    - files:
+      - "targets/alertmanagers*.yaml"
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "rules/*.yaml"
+  - "alert_rules/*.yaml" 
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+    file_sd_configs:
+    - files:                                               
+      - targets/prometheus-*.yaml  
+      refresh_interval: 2m 
+
+  # All nodes
+  - job_name: 'nodes'
+    file_sd_configs:
+    - files:                                               
+      - targets/nodes-*.yaml  
+      refresh_interval: 2m 
+
+  - job_name: 'alertmanagers'
+    file_sd_configs:
+    - files:
+      - targets/alertmanagers*.yaml
+      refresh_interval: 2m 
