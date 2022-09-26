@@ -1,0 +1,70 @@
+version: '3.3'
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+
+networks:
+  monitoring:
+    driver: bridge
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.38.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring
+    ports:
+      - 9090:9090
+    restart: always
+
+  consul:
+    image: consul:1.13
+    volumes:
+      - ./consul_configs:/consul/config
+    networks:
+      - monitoring
+    ports:
+      - 8500:8500
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+
+  node-exporter:
+    image: prom/node-exporter:v1.3.1
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--path.rootfs=/rootfs'
+    ports:
+      - 9100:9100
+    networks:
+      - monitoring
+    restart: always
+
+  grafana:
+    image: grafana/grafana:9.0.9
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - config.monitoring
+    networks:
+      - monitoring

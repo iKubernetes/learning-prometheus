@@ -26,14 +26,14 @@ scrape_configs:
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
+
     static_configs:
     - targets:
       - localhost:9090
 
   # All nodes
   - job_name: 'nodes'
-    consul_sd_configs:
-    - server: "consul:8500"
-      tags:
-      - "nodes"
-      refresh_interval: 1m 
+    file_sd_configs:
+    - files:                                               
+      - targets/nodes-*.yaml  
+      refresh_interval: 2m 

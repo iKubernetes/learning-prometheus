@@ -36,4 +36,12 @@ scrape_configs:
     - server: "consul:8500"
       tags:
       - "nodes"
-      refresh_interval: 1m 
+      refresh_interval: 2m 
+
+  # grafana
+  - job_name: 'grafana'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "grafana"
+      refresh_interval: 2m 
