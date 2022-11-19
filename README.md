@@ -3,11 +3,14 @@
 本项目是[马哥教育](http://www.magedu.com)的Prometheus实践专题课程的实践代码库。
 
 ### Prometheus快速入门培训课程示例素材(config_example)
-Prometheus训练营配置文件示例：
-- files-sd：基于文件的服务发现配置示例；
-- consul-sd：基于consul的服务发现配置示例：
-- relabel-examples：重新打标配置示例；
-- rules：recording rules和alerting rules示例；
+Prometheus训练营配置文件示例，各示例均由Docker Compose编排运行：
+- 00-node-exporter：在linux节点上启动node-exporter
+- 01-prometheus-basics-example：file-sd示例
+- 02-prometheus-sd-consul-example：consul-sd示例
+- 03-prometheus-grafana-app-exporters：应用程序监控及exporter配置示例
+- 04-prometheus-blackbox-monitoring：黑盒监控示例
+- 05-prometheus-alertmanager：告警系统简单示例
+- 
 
 ## iKubernetes公众号
 

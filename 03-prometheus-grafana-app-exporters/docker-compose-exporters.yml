@@ -9,11 +9,16 @@ volumes:
 networks:
   monitoring:
     driver: bridge
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.3.0/24
 
 services:
 
   prometheus:
     image: prom/prometheus:v2.40.1
+    hostname: prometheus.magedu.com
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -24,7 +29,10 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.enable-lifecycle'
     networks:
-      - monitoring
+      - monitoring: 
+          ipv4_address: 172.31.3.10
+          aliases:
+            - prometheus.magedu.com
     ports:
       - 9090:9090
     depends_on:
@@ -32,10 +40,14 @@ services:
 
   consul:
     image: consul:1.14
+    hostname: consul.magedu.com
     volumes:
       - ./consul_configs:/consul/config
     networks:
-      - monitoring
+      - monitoring: 
+          ipv4_address: 172.31.3.11
+          aliases:
+            - consul.magedu.com
     ports:
       - 8500:8500
     command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
