@@ -28,7 +28,7 @@ services:
     restart: always
 
   consul:
-    image: consul:1.13
+    image: consul:1.14
     volumes:
       - ./consul_configs:/consul/config
     networks:
