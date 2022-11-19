@@ -92,7 +92,7 @@ services:
   # GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'mysqld-exporter';
   # GRANT SELECT ON performance_schema.* TO 'exporter'@'mysqld-exporter';
   mysqld-exporter:
-    image: prom/mysqld-exporter
+    image: prom/mysqld-exporter:v0.14.0
     command:
      - --collect.info_schema.innodb_metrics
      - --collect.info_schema.innodb_tablespaces
