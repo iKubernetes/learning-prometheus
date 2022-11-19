@@ -46,8 +46,9 @@
     }]
   }
 }
+```
 
-注册命令
+### 注册命令
 
 ```bash
 curl -XPUT --data @grafana.json http://consul:8500/v1/agent/service/register
