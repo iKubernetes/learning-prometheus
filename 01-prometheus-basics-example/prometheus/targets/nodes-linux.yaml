@@ -1,8 +1,6 @@
 - targets:
-  - 172.29.6.1:9100
-  - 172.29.6.11:9100
-  - 172.29.6.12:9100
-  - 172.29.3.100:9100
+  - server01.magedu.com:9100
+  - server02.magedu.com:9100
   labels:
     app: node-exporter
     job: node

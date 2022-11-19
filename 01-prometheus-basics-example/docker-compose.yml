@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.6'
 
 volumes:
     prometheus_data: {}
@@ -10,7 +10,7 @@ networks:
 services:
 
   prometheus:
-    image: prom/prometheus:v2.38.0
+    image: prom/prometheus:v2.40.1
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -27,7 +27,7 @@ services:
     restart: always
 
   node-exporter:
-    image: prom/node-exporter:v1.3.1
+    image: prom/node-exporter:v1.4.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
