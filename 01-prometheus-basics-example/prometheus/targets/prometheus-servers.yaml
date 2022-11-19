@@ -1,5 +1,5 @@
 - targets:
-  - 172.29.1.11:9090
+  - localhost:9090
   labels:
     app: prometheus
     job:  prometheus
