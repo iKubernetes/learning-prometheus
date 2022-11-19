@@ -53,3 +53,28 @@ scrape_configs:
       tags:
       - "consul-exporter"
       refresh_interval: 2m 
+
+  # mysqld-exporter
+  - job_name: 'mysqld-exporter'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "mysqld-exporter"
+      refresh_interval: 2m 
+
+  # nginx-exporter
+  - job_name: 'nginx-exporter'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "nginx-exporter"
+      refresh_interval: 2m 
+
+
+  # tomcat
+  - job_name: 'tomcat'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "tomcat"
+      refresh_interval: 2m 

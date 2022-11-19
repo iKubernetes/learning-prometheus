@@ -4,6 +4,7 @@ volumes:
     prometheus_data: {}
     grafana_data: {}
     mysqld_data: {}
+    tomcat_webapps: {}
 
 networks:
   monitoring:
@@ -26,7 +27,8 @@ services:
       - monitoring
     ports:
       - 9090:9090
-    restart: always
+    depends_on:
+      - consul
 
   consul:
     image: consul:1.14
@@ -36,10 +38,10 @@ services:
       - monitoring
     ports:
       - 8500:8500
-    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
-    image: prom/node-exprter:v1.4.0
+    image: prom/node-exporter:v1.4.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -53,7 +55,6 @@ services:
       - 9100:9100
     networks:
       - monitoring
-    restart: always
 
   consul-exporter:
     image: prom/consul-exporter:v0.8.0
@@ -82,13 +83,13 @@ services:
   mysqld-exporter:
     image: prom/mysqld-exporter
     command:
-     - -collect.info_schema.innodb_metrics
-     - -collect.info_schema.innodb_tablespaces
-     - -collect.perf_schema.eventsstatementssum
-     - -collect.perf_schema.memory_events
-     - -collect.global_status
-     - -collect.engine_innodb_status
-     - -collect.binlog_size
+     - --collect.info_schema.innodb_metrics
+     - --collect.info_schema.innodb_tablespaces
+     - --collect.perf_schema.eventsstatementssum
+     - --collect.perf_schema.memory_events
+     - --collect.global_status
+     - --collect.engine_innodb_status
+     - --collect.binlog_size
     environment:
       - DATA_SOURCE_NAME=exporter:exporter@(mysqld:3306)/
     ports:
@@ -98,8 +99,49 @@ services:
     depends_on:
       - mysqld
 
+  nginx:
+    image: nginx:1.22.1
+    volumes:
+      - ./nginx/stub_status-server.conf:/etc/nginx/conf.d/stub_status-server.conf:ro
+    networks:
+      - monitoring
+    expose:
+      - 8080
+      - 80
+    ports:
+      - 80:80
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.11
+    command:
+      - '-nginx.scrape-uri=http://nginx:8080/stub_status'
+    networks:
+      - monitoring
+    ports:
+      - '9113:9113'
+    depends_on:
+      - nginx
+
+  tomcat:
+    #image: tomcat:jdk11
+    build:
+      context: tomcat
+      dockerfile: Dockerfile 
+    hostname: tomcat.magedu.com
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    volumes:
+      - tomcat_webapps:/usr/local/tomcat/webapps
+      - ./tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
+    networks:
+      - monitoring
+    environment:
+      TZ: Asia/Shanghai
+
   grafana:
-    image: grafana/grafana:9.0.9
+    image: grafana/grafana:9.2.5
     depends_on:
       - prometheus
     ports:

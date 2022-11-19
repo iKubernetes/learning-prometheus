@@ -11,7 +11,7 @@ networks:
 services:
 
   prometheus:
-    image: prom/prometheus:v2.37.1
+    image: prom/prometheus:v2.40.2
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -28,7 +28,7 @@ services:
     restart: always
 
   consul:
-    image: consul:1.13
+    image: consul:1.14
     volumes:
       - ./consul_configs:/consul/config
     networks:
@@ -38,7 +38,7 @@ services:
     command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
-    image: prom/node-exporter:v1.3.1
+    image: prom/node-exporter:v1.4.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -65,7 +65,7 @@ services:
     restart: always
 
   grafana:
-    image: grafana/grafana:9.0.9
+    image: grafana/grafana:9.2.5
     depends_on:
       - prometheus
     ports:
