@@ -4,7 +4,7 @@
       "id": "mysqld-exporter",
       "name": "mysqld-exporter",
       "address": "mysqld-exporter",
-      "port": 9107,
+      "port": 9104,
       "tags": ["mysqld-exporter"],
       "checks": [{
         "http": "http://mysqld-exporter:9104/metrics",
