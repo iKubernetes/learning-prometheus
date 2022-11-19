@@ -5,12 +5,20 @@
 - nginx-exporter
 - tomcat
 
+### 各关键服务端口
+
+- prometheus: 9090/tcp
+- consul： 8500/tcp
+- tomcat: 8080/tcp
+- grafana: 3000/tcp
+
 ### mysqld-exporter使用说明
 
 需要在mysqld上运行如下命令，为mysqld-exporter创建具有采集监控数据权限的用户账号
 
+```
   mysql> CREATE USER 'exporter'@'mysqld-exporter' IDENTIFIED BY 'exporter';
   mysql> GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'mysqld-exporter';
   mysql> GRANT SELECT ON performance_schema.* TO 'exporter'@'mysqld-exporter';
-
+```
 
