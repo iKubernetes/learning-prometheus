@@ -24,9 +24,9 @@ route:
     group_interval: 10s
 
     # If an alert has successfully been sent, wait 'repeat_interval' to resend them.
-    repeat_interval: 10m
+    repeat_interval: 30m
 
-    receiver: team-devops-email
+    receiver: team-devops-dingtalk
     #receiver: wechat
     #receiver: webhook
 
@@ -35,7 +35,7 @@ route:
     # This routes performs a regular expression match on alert labels to
     # catch alerts that are related to a list of jobs.
     - matchers:
-        - job=~"mysql|tomcat"
+        - job =~ "mysql|tomcat"
       receiver: team-devops-email
 
       # The service has a sub-route for critical alerts, any alerts
@@ -43,16 +43,16 @@ route:
       # parent node and are sent to 'team-devops-email'
       routes:
         - matchers:
-            - severity="critical"
+            - severity = "critical"
           receiver: team-devops-dingtalk
 
     - matchers:
-        - service="nginx-exporter"
+        - job = "nginx-exporter"
       receiver: team-devops-email
 
       routes:
         - matchers:
-            - severity="critical"
+            - severity = "critical"
           receiver: team-devops-wechat
 
 templates:
@@ -86,4 +86,4 @@ inhibit_rules:
      severity: 'critical' 
     target_match: 
      severity: 'warning' 
-    equal: ['alertname', 'instance']
+    equal: ['alertname', 'job']

@@ -199,6 +199,9 @@ services:
     hostname: dingtalk.magedu.com
     volumes:
       - ./dingtalk/:/etc/prometheus-webhook-dingtalk/
+    #command:
+      #- --config.file=config.yml
+      #- --config.file=/etc/prometheus-webhook-dingtalk/config-with-template.yml
     networks:
       - monitoring
     ports:
