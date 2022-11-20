@@ -35,118 +35,30 @@
 
 注意：在docker-compose.yml文件中，mysqld-exporter接入mysqld的用户密和密码默认为“exporter”，因此，或需修改，请同时修改该文件中的配置；
 
-#### mysqld监控可用的一些示例记录规则
 
-```
-groups:
-- name: mysqld_rules
-  rules:
+## Alerting
 
-  # Record slave lag seconds for pre-computed timeseries that takes
-  # `mysql_slave_status_sql_delay` into account
-  - record: instance:mysql_slave_lag_seconds
-    expr: mysql_slave_status_seconds_behind_master - mysql_slave_status_sql_delay
-
-  # Record slave lag via heartbeat method
-  - record: instance:mysql_heartbeat_lag_seconds
-    expr: mysql_heartbeat_now_timestamp_seconds - mysql_heartbeat_stored_timestamp_seconds
-
-  - record: job:mysql_transactions:rate5m
-    expr: sum without (command) (rate(mysql_global_status_commands_total{command=~"(commit|rollback)"}[5m]))
-```
-
-#### mysqld监控可用的示例告警规则
-
-```
-groups:
-- name: MySQLAlerts
-  rules:
-  - alert: MySQLDown
-    expr: mysql_up != 1
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      description: 'MySQL {{$labels.job}} on {{$labels.instance}} is not up.'
-      summary: MySQL not up.  
-  - alert: MySQLReplicationNotRunning
-    expr: mysql_slave_status_slave_io_running == 0 or mysql_slave_status_slave_sql_running
-      == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      description: "Replication on {{$labels.instance}} (IO or SQL) has been down for more than 2 minutes."
-      summary: Replication is not running.
-  - alert: MySQLReplicationLag
-    expr: (instance:mysql_slave_lag_seconds > 30) and on(instance) (predict_linear(instance:mysql_slave_lag_seconds[5m],
-      60 * 2) > 0)
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      description: "Replication on {{$labels.instance}} has fallen behind and is not recovering."
-      summary: MySQL slave replication is lagging.
-  - alert: MySQLHeartbeatLag
-    expr: (instance:mysql_heartbeat_lag_seconds > 30) and on(instance) (predict_linear(instance:mysql_heartbeat_lag_seconds[5m],
-      60 * 2) > 0)
-    for: 1m
-    labels:
-      severity: critical
-    annotations:
-      description: "The heartbeat is lagging on {{$labels.instance}} and is not recovering."
-      summary: MySQL heartbeat is lagging.
-  - alert: MySQLInnoDBLogWaits
-    expr: rate(mysql_global_status_innodb_log_waits[15m]) > 10
-    labels:
-      severity: warning
-    annotations:
-      description: The innodb logs are waiting for disk at a rate of {{$value}} /
-        second
-      summary: MySQL innodb log writes stalling.
-```
-
-## Consul Exporter有用的查询示例
-
-**Are my services healthy?**
-
-```
-min(consul_catalog_service_node_healthy) by (service_name)
-```
-
-Values of 1 mean that all nodes for the service are passing. Values of 0 mean at least one node for the service is not passing.
-
-**处于宕机状态的服务节点**
-
-```
-sum by (node, service_name)(consul_catalog_service_node_healthy == 0)
-```
-
-**获取处于critical状态的服务**
-
-```
-consul_health_service_status{status="critical"} == 1
-```
-
-You can query for the following health check states: "maintenance", "critical", "warning" or "passing"
-
-## BlackBox Exporter
-
-### Ping Configuration
+### Rules Configuration
 
 If you would like to add or change the Ping targets should be monitored you'll want to edit the `targets` section in [prometheus/prometheus.yml](prometheus/prometheus.yml)
 
 ```yml
 ...
 
-- job_name: 'blackbox'
-  metrics_path: /probe
-  params:
-    module: [http_2xx]
-  static_configs:
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
     - targets:
-      - https://magedu.com # edit here
-      - https://google.com # edit here
+      - alertmanager:9093
+    scheme: http
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - rules/alert-rules-*.yml
+  - rules/record-rules-*.yml
+  # - "first_rules.yml"
+  # - "second_rules.yml"
 
 ...
 ```
@@ -158,14 +70,90 @@ curl -X POST http://<Host IP Address>:9090/-/reload
 ```
 
 ### Alert Configuration
-The [PagerTree](https://pagertree.com) configuration requires to create a Prometheus Integration. Follow steps 1-6 [here](https://pagertree.com/knowledge-base/integration-prometheus/#in-pagertree) then replace `https://ngrok.io` in [/alertmanager/config.yml](/alertmanager/config.yml) with your copied webhook.
+
+告警消息默认发给team-devops-dingtalk，其它的按需进行路由。
 
 ```yml
-...
+route:
+    # The labels by which incoming alerts are grouped together. For example,
+    # multiple alerts coming in for job=mysqld-exporter and alertname=mysql_down would
+    # be batched into a single group.
+    group_by: ['job', 'alertname'] 
+
+    # When a new group of alerts is created by an incoming alert, wait at
+    # least 'group_wait' to send the initial notification.
+    # This way ensures that you get multiple alerts for the same group that start
+    # firing shortly after another are batched together on the first notification.
+    group_wait: 10s
+
+    # When the first notification was sent, wait 'group_interval' to send a batch
+    # of new alerts that started firing for that group.
+    group_interval: 10s
+
+    # If an alert has successfully been sent, wait 'repeat_interval' to resend them.
+    repeat_interval: 30m
+
+    receiver: team-devops-dingtalk
+    #receiver: wechat
+    #receiver: webhook
+
+    # The child route trees.
+    routes:
+    # This routes performs a regular expression match on alert labels to
+    # catch alerts that are related to a list of jobs.
+    - matchers:
+        - job =~ "mysql|tomcat"
+      receiver: team-devops-email
+
+      # The service has a sub-route for critical alerts, any alerts
+      # that do not match, i.e. severity != critical, fall-back to the
+      # parent node and are sent to 'team-devops-email'
+      routes:
+        - matchers:
+            - severity = "critical"
+          receiver: team-devops-dingtalk
+
+    - matchers:
+        - job = "nginx-exporter"
+      receiver: team-devops-email
+
+      routes:
+        - matchers:
+            - severity = "critical"
+          receiver: team-devops-wechat
+
+templates:
+  - '/etc/alertmanager/email_template.tmpl'
+
+ # 定义接收者
 receivers:
-    - name: 'email'
-      email_configs:
-...
+- name: 'team-devops-email'
+  email_configs:
+    - to: 'mage@magedu.com'
+      headers:
+        subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
+      html: '{{ template "email.to.html" . }}'
+      send_resolved: true 
+
+- name: 'team-devops-wechat'
+  wechat_configs:
+    - corp_id: ww4c893...
+      to_user: '@all'
+      agent_id: 1000008
+      api_secret: WTepmmaqxbBOeTQ...
+      send_resolved: true
+
+- name: 'team-devops-dingtalk'
+  webhook_configs:
+  - url: http://prometheus-webhook-dingtalk:8060/dingtalk/webhook1/send             
+    send_resolved: true
+
+inhibit_rules: 
+  - source_match: 
+     severity: 'critical' 
+    target_match: 
+     severity: 'warning' 
+    equal: ['alertname', 'job']  
 ```
 
 If you made changes to the AlertManager config you'll want to reload the configuration using the following command:
@@ -174,14 +162,14 @@ If you made changes to the AlertManager config you'll want to reload the configu
 curl -X POST http://<Host IP Address>:9093/-/reload
 ```
 
-## Alerting
+### 钉钉告警测试说明
 
-There are 3 basic alerts that have been added to this stack.
+dingtalk目录下提供了三个配置文件，它们都可以复制为config.yml，以作为默认被加载的配置文件进行告警测试。
 
-| Alert | Time To Fire | Description |
-| --- | :---: | --- |
-| Site Down | 30 seconds | Fires if a website check is down |
-| Service Down | 30 seconds | Fires if a service in this setup is down |
-| High Load | 30 seconds | Fires if the CPU load is greater than 50% |
+- config-no-template.yml： 没有使用消息模板的配置文件；
+- config-use-default-template.yml：使用了内置消息模板的配置文件；
+- config-use-customed-template.yml：使用了自定义消息模板的配置文件；
 
-To get alerts sent to you, follow the directions in the [Alert Configuration Section](#alert-configuration).
+
+
+
