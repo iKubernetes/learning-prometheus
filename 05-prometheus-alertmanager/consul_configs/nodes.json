@@ -1,35 +1,46 @@
 {
   "services": [
     {
-      "id": "node_exporter-node01",
-      "name": "node01",
-      "address": "172.29.6.11",
-      "port": 9100,
-      "tags": ["nodes"],
-      "checks": [{
-        "http": "http://172.29.6.11:9100/metrics",
-        "interval": "5s"
-      }]
-    },
-    {
-      "id": "node_exporter-node02",
-      "name": "node02",
-      "address": "172.29.6.12",
-      "port": 9100,
-      "tags": ["nodes"],
-      "checks": [{
-        "http": "http://172.29.6.12:9100/metrics",
-        "interval": "5s"
-      }]
-    },
-    {
-      "id": "node_exporter-node03",
-      "name": "node03",
+      "id": "node_exporter-prometheus",
+      "name": "prometheus-server",
       "address": "node-exporter",
       "port": 9100,
       "tags": ["nodes"],
       "checks": [{
         "http": "http://node-exporter:9100/metrics",
+        "interval": "5s"
+      }]
+    },
+    {
+      "id": "node_exporter-node01",
+      "name": "server01.magedu.com",
+      "address": "server01.magedu.com",
+      "port": 9100,
+      "tags": ["nodes"],
+      "checks": [{
+        "http": "http://server01.magedu.com:9100/metrics",
+        "interval": "5s"
+      }]
+    },
+    {
+      "id": "node_exporter-node02",
+      "name": "server02.magedu.com",
+      "address": "server02.magedu.com",
+      "port": 9100,
+      "tags": ["nodes"],
+      "checks": [{
+        "http": "http://server02.magedu.com:9100/metrics",
+        "interval": "5s"
+      }]
+    },
+    {
+      "id": "node_exporter-node03",
+      "name": "server03.magedu.com",
+      "address": "server03.magedu.com",
+      "port": 9100,
+      "tags": ["nodes"],
+      "checks": [{
+        "http": "http://server03.magedu.com:9100/metrics",
         "interval": "5s"
       }]
     }

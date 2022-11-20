@@ -6,11 +6,6 @@ global:
   evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
   # scrape_timeout is set to the global default (10s).
 
-  # Attach these labels to any time series or alerts when communicating with
-  # external systems (federation, remote storage, Alertmanager).
-  external_labels:
-      monitor: 'my-project' 
-
 # Alertmanager configuration
 alerting:
   alertmanagers:
@@ -21,6 +16,7 @@ alerting:
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
+  - 'record.rules'
   - 'alert.rules'
   # - "first_rules.yml"
   # - "second_rules.yml"
@@ -61,6 +57,32 @@ scrape_configs:
       - "consul-exporter"
       refresh_interval: 2m 
 
+  # mysqld-exporter
+  - job_name: 'mysqld-exporter'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "mysqld-exporter"
+      refresh_interval: 2m 
+
+  # nginx-exporter
+  - job_name: 'nginx-exporter'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "nginx-exporter"
+      refresh_interval: 2m 
+
+
+  # tomcat
+  - job_name: 'tomcat'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "tomcat"
+      refresh_interval: 2m 
+
+  # Blackbox Exporter
   - job_name: 'blackbox'
     metrics_path: /probe
     params:
