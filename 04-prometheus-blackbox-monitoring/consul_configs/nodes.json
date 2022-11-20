@@ -1,7 +1,7 @@
 {
   "services": [
     {
-      "id": "node_exporter-master01",
+      "id": "node_exporter-prometheus",
       "name": "prometheus-server",
       "address": "node-exporter",
       "port": 9100,

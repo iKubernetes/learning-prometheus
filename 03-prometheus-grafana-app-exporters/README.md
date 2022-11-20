@@ -14,7 +14,7 @@
 - tomcat: 8080/tcp
 - grafana: 3000/tcp
 
-### mysqld-exporter使用说明
+## mysqld-exporter使用说明
 
 需要在mysqld上运行如下命令，为mysqld-exporter创建具有采集监控数据权限的用户账号
 
@@ -105,7 +105,7 @@ groups:
       summary: MySQL innodb log writes stalling.
 ```
 
-### Consul Exporter有用的查询示例
+## Consul Exporter有用的查询示例
 
 **Are my services healthy?**
 
