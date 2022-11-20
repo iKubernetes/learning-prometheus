@@ -100,3 +100,13 @@ scrape_configs:
         replacement: "blackbox_exporter:9115"  # Blackbox exporter.
       - target_label: region
         replacement: "local"
+
+  # AlertManager
+  - job_name: 'alertmanager'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    metrics_path: /metrics
+    static_configs:
+    - targets:
+      - alertmanager:9093

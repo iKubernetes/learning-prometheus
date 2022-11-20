@@ -12,6 +12,7 @@ services:
 
   prometheus:
     image: prom/prometheus:v2.40.1
+    hostname: prometheus.magedu.com
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -23,6 +24,10 @@ services:
       - '--web.enable-lifecycle'
     networks:
       - monitoring
+    extra_hosts:
+      - "server01.magedu.com:${SERVER01_HOST_IP}"
+      - "server02.magedu.com:${SERVER02_HOST_IP}"
+      - "server03.magedu.com:${SERVER03_HOST_IP}"
     ports:
       - 9090:9090
     restart: always

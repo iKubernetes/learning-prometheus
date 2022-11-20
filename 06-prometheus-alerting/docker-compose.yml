@@ -32,6 +32,10 @@ services:
         ipv4_address: 172.31.6.20
         aliases:
           - "prometheus.magedu.com"
+    extra_hosts:
+      - "server01.magedu.com:${SERVER01_HOST_IP}"
+      - "server02.magedu.com:${SERVER02_HOST_IP}"
+      - "server03.magedu.com:${SERVER03_HOST_IP}"
     ports:
       - 9090:9090
     depends_on:
