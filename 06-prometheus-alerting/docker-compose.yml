@@ -1,0 +1,201 @@
+version: '3.6'
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+    mysqld_data: {}
+    tomcat_webapps: {}
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.6.0/24
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.40.1
+    hostname: prometheus.magedu.com
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      monitoring: 
+        ipv4_address: 172.31.6.20
+        aliases:
+          - "prometheus.magedu.com"
+    ports:
+      - 9090:9090
+    depends_on:
+      - consul
+
+  consul:
+    image: consul:1.14
+    hostname: consul.magedu.com
+    volumes:
+      - ./consul_configs:/consul/config
+    networks:
+      monitoring: 
+        ipv4_address: 172.31.6.21
+        aliases:
+          - "consul.magedu.com"
+    ports:
+      - 8500:8500
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
+
+  node-exporter:
+    image: prom/node-exporter:v1.4.0
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--path.rootfs=/rootfs'
+    ports:
+      - 9100:9100
+    networks:
+      - monitoring
+
+  consul-exporter:
+    image: prom/consul-exporter:v0.8.0
+    networks:
+      - monitoring
+    ports:
+      - 9107:9107
+    command:
+      - "--consul.server=consul:8500"
+
+  mysqld:
+    image: mysql:5.7
+    volumes:
+      #- ./mysql:/etc/mysql/conf.d
+      - mysqld_data:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    networks:
+      - monitoring
+    ports:
+      - 3306:3306
+
+  # CREATE USER 'exporter'@'mysqld-exporter' IDENTIFIED BY 'XXXXXXXX';
+  # GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'mysqld-exporter';
+  # GRANT SELECT ON performance_schema.* TO 'exporter'@'mysqld-exporter';
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.14.0
+    command:
+     - --collect.info_schema.innodb_metrics
+     - --collect.info_schema.innodb_tablespaces
+     - --collect.perf_schema.eventsstatementssum
+     - --collect.perf_schema.memory_events
+     - --collect.global_status
+     - --collect.engine_innodb_status
+     - --collect.binlog_size
+    environment:
+      - DATA_SOURCE_NAME=exporter:exporter@(mysqld:3306)/
+    ports:
+      - 9104:9104
+    networks:
+      - monitoring
+    depends_on:
+      - mysqld
+
+  nginx:
+    image: nginx:1.22.1
+    volumes:
+      - ./nginx/stub_status-server.conf:/etc/nginx/conf.d/stub_status-server.conf:ro
+    networks:
+      - monitoring
+    expose:
+      - 8080
+      - 80
+    ports:
+      - 80:80
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.11
+    command:
+      - '-nginx.scrape-uri=http://nginx:8080/stub_status'
+    networks:
+      - monitoring
+    ports:
+      - '9113:9113'
+    depends_on:
+      - nginx
+
+  tomcat:
+    #image: tomcat:jdk11
+    build:
+      context: tomcat
+      dockerfile: Dockerfile 
+    hostname: tomcat.magedu.com
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    volumes:
+      - tomcat_webapps:/usr/local/tomcat/webapps
+      - ./tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
+    networks:
+      - monitoring
+    environment:
+      TZ: Asia/Shanghai
+
+  blackbox_exporter:
+    image: prom/blackbox-exporter:v0.22.0
+    volumes:
+      - ./blackboxexporter/:/etc/blackboxexporter/
+    command:
+      - '--config.file=/etc/blackboxexporter/config.yml'
+    networks:
+      - monitoring
+    ports:
+      - 9115:9115
+
+  grafana:
+    image: grafana/grafana:9.2.5
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    env_file:
+      - config.monitoring
+    networks:
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - monitoring
+    ports:
+      - 9093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=debug'
+
+  prometheus-webhook-dingtalk:
+    image: timonwong/prometheus-webhook-dingtalk:v2.1.0
+    hostname: dingtalk.magedu.com
+    volumes:
+      - ./dingtalk/:/etc/prometheus-webhook-dingtalk/
+    networks:
+      - monitoring
+    ports:
+      - 8060:8060
