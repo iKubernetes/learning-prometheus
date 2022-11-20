@@ -34,7 +34,7 @@
 
 注意：在docker-compose.yml文件中，mysqld-exporter接入mysqld的用户密和密码默认为“exporter”，因此，或需修改，请同时修改该文件中的配置；
 
-### mysqld监控可用的一些示例记录规则
+#### mysqld监控可用的一些示例记录规则
 
 ```
 groups:
@@ -54,7 +54,7 @@ groups:
     expr: sum without (command) (rate(mysql_global_status_commands_total{command=~"(commit|rollback)"}[5m]))
 ```
 
-### mysqld监控可用的示例告警规则
+#### mysqld监控可用的示例告警规则
 
 ```
 groups:
@@ -104,3 +104,27 @@ groups:
         second
       summary: MySQL innodb log writes stalling.
 ```
+
+### Consul Exporter有用的查询示例
+
+**Are my services healthy?**
+
+```
+min(consul_catalog_service_node_healthy) by (service_name)
+```
+
+Values of 1 mean that all nodes for the service are passing. Values of 0 mean at least one node for the service is not passing.
+
+**处于宕机状态的服务节点**
+
+```
+sum by (node, service_name)(consul_catalog_service_node_healthy == 0)
+```
+
+**获取处于critical状态的服务**
+
+```
+consul_health_service_status{status="critical"} == 1
+```
+
+You can query for the following health check states: "maintenance", "critical", "warning" or "passing"
