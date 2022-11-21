@@ -1,0 +1,21 @@
+[Unit]
+Description=node_exporter
+Documentation=https://prometheus.io/
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+ExecStart=/usr/local/node_exporter/node_exporter \
+  --web.config=web-config.yml \
+  --collector.ntp \
+  --collector.mountstats \
+  --collector.systemd \
+  --collector.ethtool \
+  --collector.tcpstat
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
