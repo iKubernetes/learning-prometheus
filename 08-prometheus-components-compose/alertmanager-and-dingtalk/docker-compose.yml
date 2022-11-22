@@ -1,0 +1,34 @@
+version: '3.6'
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.66.0/24
+
+services:
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      - monitoring
+    ports:
+      - 9093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=debug'
+
+  prometheus-webhook-dingtalk:
+    image: timonwong/prometheus-webhook-dingtalk:v2.1.0
+    hostname: dingtalk.magedu.com
+    volumes:
+      - ./dingtalk/:/etc/prometheus-webhook-dingtalk/
+    #command:
+      #- --config.file=config.yml
+      #- --config.file=/etc/prometheus-webhook-dingtalk/config-with-template.yml
+    networks:
+      - monitoring
+    ports:
+      - 8060:8060

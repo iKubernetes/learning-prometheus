@@ -1,0 +1,46 @@
+version: '3.6'
+
+volumes:
+    mysqld_data: {}
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.120.0/24
+
+services:
+  mysqld:
+    image: mysql:5.7
+    volumes:
+      #- ./mysql:/etc/mysql/conf.d
+      - mysqld_data:/var/lib/mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    networks:
+      - monitoring
+    ports:
+      - 3306:3306
+
+  # CREATE USER 'exporter'@'mysqld-exporter' IDENTIFIED BY 'XXXXXXXX';
+  # GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'mysqld-exporter';
+  # GRANT SELECT ON performance_schema.* TO 'exporter'@'mysqld-exporter';
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.14.0
+    command:
+     - --collect.info_schema.innodb_metrics
+     - --collect.info_schema.innodb_tablespaces
+     - --collect.perf_schema.eventsstatementssum
+     - --collect.perf_schema.memory_events
+     - --collect.global_status
+     - --collect.engine_innodb_status
+     - --collect.binlog_size
+    environment:
+      - DATA_SOURCE_NAME=exporter:exporter@(mysqld:3306)/
+    ports:
+      - 9104:9104
+    networks:
+      - monitoring
+    depends_on:
+      - mysqld

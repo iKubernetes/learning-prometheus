@@ -1,0 +1,20 @@
+version: '3.6'
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.136.0/24
+
+services:
+  blackbox_exporter:
+    image: prom/blackbox-exporter:v0.22.0
+    volumes:
+      - ./blackboxexporter/:/etc/blackboxexporter/
+    command:
+      - '--config.file=/etc/blackboxexporter/config.yml'
+    networks:
+      - monitoring
+    ports:
+      - 9115:9115

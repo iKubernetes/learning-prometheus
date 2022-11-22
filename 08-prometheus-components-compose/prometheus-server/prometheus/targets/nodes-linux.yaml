@@ -1,0 +1,6 @@
+- targets:
+  - node-exporter:9100
+  - server01.magedu.com:9100
+  - server02.magedu.com:9100
+  labels:
+    app: node-exporter

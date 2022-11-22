@@ -1,0 +1,32 @@
+version: '3.6'
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.107.0/24
+
+services:
+  nginx:
+    image: nginx:1.22.1
+    volumes:
+      - ./nginx/stub_status-server.conf:/etc/nginx/conf.d/stub_status-server.conf:ro
+    networks:
+      - monitoring
+    expose:
+      - 8080
+      - 80
+    ports:
+      - 80:80
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.11
+    command:
+      - '-nginx.scrape-uri=http://nginx:8080/stub_status'
+    networks:
+      - monitoring
+    ports:
+      - '9113:9113'
+    depends_on:
+      - nginx

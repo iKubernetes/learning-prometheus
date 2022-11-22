@@ -1,0 +1,30 @@
+version: '3.6'
+
+volumes:
+    tomcat_webapps: {}
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.130.0/24
+
+services:
+  tomcat:
+    #image: tomcat:jdk11
+    build:
+      context: tomcat
+      dockerfile: Dockerfile 
+    hostname: tomcat.magedu.com
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    volumes:
+      - tomcat_webapps:/usr/local/tomcat/webapps
+      - ./tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
+    networks:
+      - monitoring
+    environment:
+      TZ: Asia/Shanghai

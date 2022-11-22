@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "id": "tomcat",
+      "name": "tomcat",
+      "address": "tomcat",
+      "port": 8080,
+      "tags": ["tomcat"],
+      "checks": [{
+        "http": "http://tomcat:8080/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+- targets:
+  - localhost:9090
+  labels:
+    app: prometheus
+    job:  prometheus
