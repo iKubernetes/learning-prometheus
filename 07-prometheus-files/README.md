@@ -440,8 +440,6 @@ ss -tnlp | grep '9104'
 curl localhost:9104/metrics
 ```
 
-
-
 ### 部署Blackbox Exporter
 
 提示：仅需要部署的Blackbox Exporter实例数据，取决于黑盒监控的任务量及节点的可用资源。
