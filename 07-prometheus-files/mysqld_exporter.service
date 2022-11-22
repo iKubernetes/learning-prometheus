@@ -1,0 +1,28 @@
+[Unit]
+Description=consul_exporter
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network.target
+
+[Service]
+Type=simple
+User=consul
+EnvironmentFile=-/etc/default/mysqld_exporter
+# 具体使用时，若mysql_exporter与mysql server不在同一主机时，mysql server要指向实际的地址；
+# mysql_exporter连接mysql server使用的用户名和密码均为exporter，该用户要获得正确的授权；
+Environment='DATA_SOURCE_NAME=exporter:exporter@(localhost:3306)'
+ExecStart=/usr/local/mysqld_exporter/mysqld_exporter \
+            --web.listen-address=":9104" \
+            --web.telemetry-path="/metrics" \
+            --collect.info_schema.innodb_tablespaces \
+            --collect.info_schema.innodb_metrics \
+            --collect.global_status \
+            --collect.global_variables \
+            --collect.slave_status \
+            --collect.engine_innodb_status \
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

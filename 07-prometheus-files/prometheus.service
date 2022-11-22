@@ -5,10 +5,12 @@ Documentation=https://prometheus.io/docs/introduction/overview/
 [Service]
 Restart=always
 User=prometheus
-EnvironmentFile=/etc/default/prometheus
+#EnvironmentFile=/etc/default/prometheus
 ExecStart=/usr/local/prometheus/prometheus \
-            --web.enable-lifecycle \
-            $ARGS
+            --config.file=/usr/local/prometheus/prometheus.yml \
+            --storage.tsdb.path=/usr/local/prometheus/data \
+            --web.console.libraries=/usr/share/prometheus/console_libraries \
+            --web.enable-lifecycle
 ExecReload=/bin/kill -HUP $MAINPID
 TimeoutStopSec=20s
 SendSIGKILL=no

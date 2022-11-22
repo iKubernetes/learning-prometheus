@@ -1,0 +1,22 @@
+[Unit]
+Description=consul_exporter
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network.target
+
+[Service]
+Type=simple
+User=consul
+EnvironmentFile=-/etc/default/consul_exporter
+# 具体使用时，若consul_exporter与consul server不在同一主机时，consul server要指向实际的地址；
+ExecStart=/usr/local/consul_exporter/consul_exporter \
+            --consul.server="http://localhost:8500" \
+            --web.listen-address=":9107" \
+            --web.telemetry-path="/metrics" \
+            --log.level=info \
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

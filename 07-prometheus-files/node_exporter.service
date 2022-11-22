@@ -7,7 +7,6 @@ After=network.target
 Type=simple
 User=prometheus
 ExecStart=/usr/local/node_exporter/node_exporter \
-  --web.config=web-config.yml \
   --collector.ntp \
   --collector.mountstats \
   --collector.systemd \
