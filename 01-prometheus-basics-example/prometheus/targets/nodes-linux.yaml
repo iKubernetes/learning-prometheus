@@ -4,4 +4,3 @@
   - server02.magedu.com:9100
   labels:
     app: node-exporter
-    job: node

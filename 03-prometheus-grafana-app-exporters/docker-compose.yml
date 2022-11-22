@@ -30,6 +30,8 @@ services:
       - "server03.magedu.com:${SERVER03_HOST_IP}"
     ports:
       - 9090:9090
+    depends_on:
+      - consul
     restart: always
 
   consul:
@@ -40,7 +42,7 @@ services:
       - monitoring
     ports:
       - 8500:8500
-    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
     image: prom/node-exporter:v1.4.0

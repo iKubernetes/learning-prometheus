@@ -22,6 +22,10 @@ services:
       - '--web.enable-lifecycle'
     networks:
       - monitoring
+    extra_hosts:
+      - "server01.magedu.com:${SERVER01_HOST_IP}"
+      - "server02.magedu.com:${SERVER02_HOST_IP}"
+      - "server03.magedu.com:${SERVER03_HOST_IP}"
     ports:
       - 9090:9090
     restart: always

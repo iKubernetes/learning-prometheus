@@ -1,4 +1,6 @@
-version: '3.3'
+# Author: MageEdu <mage@magedu.com>
+#
+version: '3.6'
 
 volumes:
     prometheus_data: {}
@@ -25,6 +27,12 @@ services:
       - monitoring
     ports:
       - 9090:9090
+    extra_hosts:
+      - "server01.magedu.com:${SERVER01_HOST_IP}"
+      - "server02.magedu.com:${SERVER02_HOST_IP}"
+      - "server03.magedu.com:${SERVER03_HOST_IP}"
+    depends_on:
+      - consul
     restart: always
 
   consul:
@@ -35,7 +43,7 @@ services:
       - monitoring
     ports:
       - 8500:8500
-    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-bind","127.0.0.1","-client","0.0.0.0"]
+    command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
     image: prom/node-exporter:v1.4.0
