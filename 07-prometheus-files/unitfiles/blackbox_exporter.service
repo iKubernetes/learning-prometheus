@@ -1,0 +1,20 @@
+[Unit]
+Description=blackbox_exporter
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+EnvironmentFile=-/etc/default/blackbox_exporter
+ExecStart=/usr/local/blackbox_exporter/blackbox_exporter \
+            --web.listen-address=":9115" \
+            --config.file="/usr/local/blackbox_exporter/blackbox.yml" \
+            --config.check \            
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

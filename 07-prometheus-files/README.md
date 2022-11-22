@@ -94,7 +94,7 @@ mkdir -p /usr/local/consul/config/data
 unzip consul_1.14.1_linux_amd64.zip -d /usr/local/consul
 ```
 
-创建用户，或prometheus用户已经存在，可略过该步骤：
+创建用户，若consul用户已经存在，可略过该步骤：
 ```bash
 useradd -r consul
 chown consul.consul /usr/local/consul/{data,config}
@@ -190,7 +190,7 @@ tar xf alertmanager-0.24.0.linux-amd64.tar.gz -C /usr/local/
 ln -sv /usr/local/alertmanager-0.24.0.linux-amd64 /usr/local/alertmanager
 ```
 
-创建用户，或prometheus用户已经存在，可略过该步骤：
+创建用户，若prometheus用户已经存在，可略过该步骤：
 ```bash
 useradd -r prometheus
 mkdir /usr/local/alertmanager/data
@@ -261,7 +261,7 @@ tar xf node_exporter-1.4.0.linux-amd64.tar.gz -C /usr/local/
 ln -sv /usr/local/node_exporter-1.4.0.linux-amd64 /usr/local/node_exporter
 ```
 
-创建用户，或prometheus用户已经存在，可略过该步骤：
+创建用户，若prometheus用户已经存在，可略过该步骤：
 ```bash
 useradd -r prometheus
 ```
@@ -320,7 +320,7 @@ tar xf consul_exporter-0.8.0.linux-amd64.tar.gz -C /usr/local/
 ln -sv /usr/local/consul_exporter-0.8.0.linux-amd64 /usr/local/consul_exporter
 ```
 
-创建用户，或prometheus用户已经存在，可略过该步骤：
+创建用户，若consul用户已经存在，可略过该步骤：
 ```bash
 useradd -r consul
 ```
@@ -381,7 +381,7 @@ tar xf mysqld_exporter-0.14.0.linux-amd64.tar.gz -C /usr/local/
 ln -sv /usr/local/mysqld_exporter-0.14.0.linux-amd64 /usr/local/mysqld_exporter
 ```
 
-创建用户，或prometheus用户已经存在，可略过该步骤：
+创建用户，或mysql用户已经存在，可略过该步骤：
 ```bash
 useradd -r mysql
 ```
@@ -395,7 +395,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=consul
+User=mysql
 EnvironmentFile=-/etc/default/mysqld_exporter
 # 具体使用时，若mysql_exporter与mysql server不在同一主机时，mysql server要指向实际的地址；
 # mysql_exporter连接mysql server使用的用户名和密码均为exporter，该用户要获得正确的授权；
@@ -442,5 +442,214 @@ curl localhost:9104/metrics
 
 
 
+### 部署Blackbox Exporter
 
+提示：仅需要部署的Blackbox Exporter实例数据，取决于黑盒监控的任务量及节点的可用资源。
+
+#### 部署
+
+下载程序包，以0.22.0版本为例：
+
+```bash
+curl -LO https://github.com/prometheus/blackbox_exporter/releases/download/v0.22.0/blackbox_exporter-0.22.0.linux-amd64.tar.gz
+```
+
+展开程序包：
+
+```bash
+tar xf blackbox_exporter-0.22.0.linux-amd64.tar.gz -C /usr/local/
+ln -sv /usr/local/blackbox_exporter-0.22.0.linux-amd64 /usr/local/blackbox_exporter
+```
+
+创建用户，或prometheus用户已经存在，可略过该步骤：
+
+```bash
+useradd -r prometheus
+```
+
+创建Systemd Unitfile，保存于/usr/lib/systemd/system/blackbox_exporter.service文件中:
+
+```
+[Unit]
+Description=blackbox_exporter
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+EnvironmentFile=-/etc/default/blackbox_exporter
+ExecStart=/usr/local/blackbox_exporter/blackbox_exporter \
+            --web.listen-address=":9115" \
+            --config.file="/usr/local/blackbox_exporter/blackbox.yml" \
+            --config.check \            
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启动服务：
+
+```bash
+systemctl daemon-reload
+systemctl start blackbox_exporter.service
+systemctl enable blackbox_exporter.service
+```
+
+验证监听的端口，并测试访问其暴露的指标
+
+```bash
+ss -tnlp | grep '9115'
+curl localhost:9115/metrics
+```
+
+随后即可访问Blackbox Exporter的Web UI，其使用的URL如下，其中的<HOST_IP>要替换为节点的实际地址:
+http://<HOST_IP>:9115/
+
+#### 配置Prometheus使用黑盒监控
+
+编辑prometheus的主配置文件prometheus.yml，添加类似如下内容，即可用户对目标站点的探测。
+
+```
+  # Blackbox Exporter
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # Look for a HTTP 200 response.
+    static_configs:
+    - targets:
+      - "www.magedu.com"
+      - "www.google.com"
+      refresh_interval: 2m
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: "prometheus.magedu.com:9115"  # 指向实际的Blackbox exporter.
+      - target_label: region
+        replacement: "local"
+```
+
+配置完成后，让Prometheus重载配置。
+
+```
+curl -XPOST http://<PROMETHEUS_SERVER_IP>:9090/-/reload
+```
+
+随后即可访问Blackbox Exporter的Web UI验证探测结果，其使用的URL如下，其中的<HOST_IP>要替换为节点的实际地址:
+http://<HOST_IP>:9115/
+
+## 部署Prometheus Webhook Dingtalk
+
+功能说明：Generating [DingTalk](https://www.dingtalk.com/) notification from [Prometheus](https://prometheus.io/) [AlertManager](https://github.com/prometheus/alertmanager) WebHooks.
+
+项目地址：https://github.com/timonwong/prometheus-webhook-dingtalk
+
+### 部署
+
+下载程序包，以2.1.0版本为例：
+
+```bash
+curl -LO https://github.com/timonwong/prometheus-webhook-dingtalk/releases/download/v2.1.0/prometheus-webhook-dingtalk-2.1.0.linux-amd64.tar.gz
+```
+
+展开程序包：
+
+```bash
+tar xf prometheus-webhook-dingtalk-2.1.0.linux-amd64.tar.gz -C /usr/local/
+ln -sv /usr/local/prometheus-webhook-dingtalk-2.1.0.linux-amd64 /usr/local/prometheus-webhook-dingtalk
+```
+
+创建用户，若prometheus用户已经存在，可略过该步骤：
+
+```bash
+useradd -r prometheus
+```
+
+创建配置文件/usr/local/prometheus-webhook-dingtalk/config.yml，其内容类似如下所示。
+
+```
+## Request timeout
+# timeout: 5s
+
+## Customizable templates path
+# templates:
+#   - contrib/templates/legacy/template.tmpl
+
+## You can also override default template using `default_message`
+## The following example to use the 'legacy' template from v0.3.0
+#default_message:
+#  title: '{{ template "legacy.title" . }}'
+#  text: '{{ template "legacy.content" . }}'
+
+## Targets, previously was known as "profiles"
+targets:
+  webhook1:
+    # 要修改为实际的钉钉群上机器人的Webhook地址
+    url: https://oapi.dingtalk.com/robot/send?access_token=371988d4248ee5fda293215eafe0e3c...
+    # secret for signature，要修改为实际的webhook上的加签信息
+    secret: SEC6e73901c63df8262e81bdc284f7c03874238407bcfa7db62247317...
+```
+
+创建Systemd Unitfile，保存于/usr/lib/systemd/system/prometheus-webhook-dingtalk.service文件中:
+
+```
+[Unit]
+Description=prometheus-webhook-dingtalk
+Documentation=https://github.com/timonwong/prometheus-webhook-dingtalk/tree/main/docs
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+EnvironmentFile=-/etc/default/prometheus-webhook-dingtalk
+ExecStart=/usr/local/prometheus-webhook-dingtalk/prometheus-webhook-dingtalk \
+            --web.listen-address=":8060" \
+            --config.file=/usr/local/prometheus-webhook-dingtalk/config.yml \
+            --web.enable-ui \
+            --web.enable-lifecycle \
+            --log.level=info \
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+启动服务：
+
+```bash
+systemctl daemon-reload
+systemctl start prometheus-webhook-dingtalk.service
+systemctl enable prometheus-webhook-dingtalk.service
+```
+
+验证监听的端口：
+
+```bash
+ss -tnlp | grep '8060'
+```
+
+随后即可访问Prometheus-Webhook-Dingtalk内置的Web UI接口，其使用的URL如下，其中的<HOST_IP>要替换为节点的实际地址:
+http://<HOST_IP>:8060/ui/
+
+### 配置AlertManager通过钉钉进行告警
+
+编辑alertmanager的配置文件alertmanager.yml，添加如下receiver，并需要路由中调用它。
+
+```
+- name: 'team-devops-dingtalk'
+  webhook_configs:
+  # 注意配置调用的地址和webhook的名称与前面配置中启用的targets保持一致
+  - url: http://prometheus-webhook-dingtalk.magedu.com:8060/dingtalk/webhook1/send             
+    send_resolved: true
+```
 

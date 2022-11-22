@@ -1,0 +1,22 @@
+[Unit]
+Description=prometheus-webhook-dingtalk
+Documentation=https://github.com/timonwong/prometheus-webhook-dingtalk/tree/main/docs
+After=network.target
+
+[Service]
+Type=simple
+User=prometheus
+EnvironmentFile=-/etc/default/prometheus-webhook-dingtalk
+ExecStart=/usr/local/prometheus-webhook-dingtalk/prometheus-webhook-dingtalk \
+            --web.listen-address=":8060" \
+            --config.file=/usr/local/prometheus-webhook-dingtalk/config.yml \
+            --web.enable-ui \
+            --web.enable-lifecycle \
+            --log.level=info \
+            $ARGS
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
