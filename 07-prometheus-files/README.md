@@ -82,6 +82,8 @@ http://<HOST_IP>:9090/
 
 组件功能：用于为Prometheus提供基于Consul进行服务发现的测试环境。
 
+#### 部署
+
 下载Consul，以1.14.1版本为例：
 ```bash
 curl -LO https://releases.hashicorp.com/consul/1.14.1/consul_1.14.1_linux_amd64.zip
@@ -144,6 +146,109 @@ ss -tnlp | grep '8500'
 
 随后即可访问Consul的Web UI，其使用的URL如下，其中的<HOST_IP>要替换为节点的实际地址:
 http://<HOST_IP>:8500/
+
+#### 直接请求API进行服务注册
+
+相关的[文档](https://developer.hashicorp.com/consul/api-docs/agent/service#register-service)
+
+列出已经注册的服务：
+
+```
+curl -XGET http://localhost:8500/v1/agent/services
+```
+
+获取某个特定服务的配置信息：
+
+```
+curl -XGET http://localhost:8500/v1/agent/service/<SERVICE_ID>
+```
+
+注册一个服务到Consul上，请求报文的body必须遵循json语法规范，且要符合Consul Service的API要求：
+
+```
+curl -XPUT --data @/path/to/payload_file.json http://localhost:8500/v1/agent/service/register
+```
+
+例如，下面定义了一个要注册的tomcat服务示例，它保存于tomcat.json文件中
+
+```
+{
+      "id": "tomcat",
+      "name": "tomcat",
+      "address": "tomcat",
+      "port": 8080,
+      "tags": ["tomcat"],
+      "checks": [{
+        "http": "http://tomcat:8080/metrics",
+        "interval": "5s"
+      }]
+}
+```
+
+我们可以使用类似如下命令完成服务注册。
+
+```
+curl -XPUT --data @tomcat.json http://localhost:8500/v1/agent/service/register
+```
+
+注销某个服务：
+
+```
+curl -XPUT http://localhost:8500/v1/agent/service/deregister/<SERVICE_ID>
+```
+
+#### 使用register命令注册服务
+
+consul services register命令也可用于进行服务注册，只是其使用的配置格式与直接请求HTTP API有所不同。
+
+```
+consul services register /path/to/pyload_file.json
+```
+
+注册单个服务时，使用service进行定义，注册多个服务时，使用services以列表格式进行定义。下面的示例定义了单个要注册的服务。
+
+```
+{
+  "service": {
+      "id": "tomcat",
+      "name": "tomcat",
+      "address": "tomcat",
+      "port": 8080,
+      "tags": ["tomcat"],
+      "checks": [{
+        "http": "http://tomcat:8080/metrics",
+        "interval": "5s"
+      }]
+  }
+}
+```
+
+下面的示例，以多个的服务的格式给出了定义。
+
+```
+{
+  "services": [{
+      "id": "tomcat",
+      "name": "tomcat",
+      "address": "tomcat",
+      "port": 8080,
+      "tags": ["tomcat"],
+      "checks": [{
+        "http": "http://tomcat:8080/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}
+```
+
+注销服务，也可以使用consul services deregister命令进行。
+
+```
+ consul services deregister -id <SERVICE_ID>
+```
+
+
 
 
 ### 部署Grafana
