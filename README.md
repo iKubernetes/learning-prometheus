@@ -10,7 +10,9 @@ Prometheus训练营配置文件示例，各示例均由Docker Compose编排运�
 - 03-prometheus-grafana-app-exporters：应用程序监控及exporter配置示例
 - 04-prometheus-blackbox-monitoring：黑盒监控示例
 - 05-prometheus-alertmanager：告警系统简单示例
-- 
+- 06-prometheus-alerting：钉钉告警及告警路由示例
+- 07-prometheus-files：手动部署Prometheus及相关的组件
+- 08-prometheus-components-compose：Prometheus各组件可独立运行的多个compose文件
 
 ## iKubernetes公众号
 
@@ -25,4 +27,4 @@ Prometheus训练营配置文件示例，各示例均由Docker Compose编排运�
 ![图书封面](https://github.com/iKubernetes/Kubernetes_Advanced_Practical_2rd/raw/main/imgs/book.jpg)
 
 ### 版权声明
-本文档由[马哥教育](www.magedu.com)开发，允许自由转载，商用需要征得马哥教育的书面同意。
+本文档由[马哥教育](www.magedu.com)开发，允许自由转载，但必须保留马哥教育及相关的一切标识。另外，商用需要征得马哥教育的书面同意。
