@@ -1,7 +1,7 @@
 version: '3.6'
 
 volumes:
-  consule_data: {}
+  consul_data: {}
 
 networks:
   monitoring:

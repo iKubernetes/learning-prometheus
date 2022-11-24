@@ -14,7 +14,7 @@ services:
   mysqld:
     image: mysql:5.7
     volumes:
-      #- ./mysql:/etc/mysql/conf.d
+      - ./mysql:/etc/mysql/conf.d
       - mysqld_data:/var/lib/mysql
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
@@ -23,9 +23,9 @@ services:
     ports:
       - 3306:3306
 
-  # CREATE USER 'exporter'@'mysqld-exporter' IDENTIFIED BY 'XXXXXXXX';
-  # GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'mysqld-exporter';
-  # GRANT SELECT ON performance_schema.* TO 'exporter'@'mysqld-exporter';
+  # CREATE USER 'exporter'@'172.31.%.%' IDENTIFIED BY 'exporter';
+  # GRANT PROCESS, REPLICATION CLIENT ON *.* TO 'exporter'@'172.31.%.%';
+  # GRANT SELECT ON performance_schema.* TO 'exporter'@'172.31.%.%';
   mysqld-exporter:
     image: prom/mysqld-exporter:v0.14.0
     command:

@@ -1,4 +1,4 @@
-{{ define "email.to.html" }}
+{{ define "email.default.html" }}
 {{- if gt (len .Alerts.Firing) 0 -}}
 {{ range .Alerts }}
 =========start==========<br>

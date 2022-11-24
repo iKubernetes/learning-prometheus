@@ -27,36 +27,12 @@ route:
     repeat_interval: 5m
 
     receiver: team-devops-dingtalk
-    #receiver: wechat
-    #receiver: webhook
-
-    # The child route trees.
-    routes:
-    # This routes performs a regular expression match on alert labels to
-    # catch alerts that are related to a list of jobs.
-    - matchers:
-        - job =~ "mysql|tomcat"
-      receiver: team-devops-email
-
-      # The service has a sub-route for critical alerts, any alerts
-      # that do not match, i.e. severity != critical, fall-back to the
-      # parent node and are sent to 'team-devops-email'
-      routes:
-        - matchers:
-            - severity = "critical"
-          receiver: team-devops-dingtalk
-
-    - matchers:
-        - job = "nginx-exporter"
-      receiver: team-devops-email
-
-      routes:
-        - matchers:
-            - severity = "critical"
-          receiver: team-devops-wechat
+    #receiver: team-devops-email
+    #receiver: team-devops-wechat
 
 templates:
   - '/etc/alertmanager/email_template.tmpl'
+  - '/etc/alertmanager/wechat_template.tmpl'
 
  # 定义接收者
 receivers:
@@ -65,7 +41,7 @@ receivers:
     - to: 'mage@magedu.com'
       headers:
         subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
-      html: '{{ template "email.to.html" . }}'
+      html: '{{ template "email.default.html" . }}'
       send_resolved: true 
 
 - name: 'team-devops-wechat'
