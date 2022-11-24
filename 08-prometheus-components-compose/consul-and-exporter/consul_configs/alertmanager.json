@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "id": "alertmanager",
+      "name": "alertmanager",
+      "address": "alert.magedu.com",
+      "port": 9093,
+      "tags": ["alertmanager"],
+      "checks": [{
+        "http": "http://alert.magedu.com:9093/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}
