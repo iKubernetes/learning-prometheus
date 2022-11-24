@@ -3,7 +3,7 @@ global:
     smtp_smarthost: 'smtp.qq.com:465'
     smtp_from: 'ikubernetes@qq.com'
     smtp_auth_username: 'ikubernetes@qq.com'
-    smtp_auth_password: 'egnvzqffqjsjcaec'
+    smtp_auth_password: 'ioojgoqmgybfbgfg'
     smtp_hello: '@qq.com'
     smtp_require_tls: false
 
