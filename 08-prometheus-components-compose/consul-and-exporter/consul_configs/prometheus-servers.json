@@ -1,13 +1,13 @@
 {
   "services": [
     {
-      "id": "prometheus-server-node01",
-      "name": "prom-server-node01",
-      "address": "prometheus",
+      "id": "prometheus-server",
+      "name": "prom-server",
+      "address": "prometheus.magedu.com",
       "port": 9090,
       "tags": ["prometheus"],
       "checks": [{
-        "http": "http://prometheus:9090/metrics",
+        "http": "http://prometheus.magedu.com:9090/metrics",
         "interval": "5s"
       }]
     }

@@ -3,11 +3,11 @@
     {
       "id": "mysqld-exporter",
       "name": "mysqld-exporter",
-      "address": "mysqld-exporter",
+      "address": "mysql.magedu.com",
       "port": 9104,
       "tags": ["mysqld-exporter"],
       "checks": [{
-        "http": "http://mysqld-exporter:9104/metrics",
+        "http": "http://mysql.magedu.com:9104/metrics",
         "interval": "5s"
       }]
     }

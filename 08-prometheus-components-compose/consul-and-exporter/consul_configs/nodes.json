@@ -3,11 +3,11 @@
     {
       "id": "node_exporter-prometheus",
       "name": "prometheus-server",
-      "address": "node-exporter",
+      "address": "prometheus.magedu.com",
       "port": 9100,
       "tags": ["nodes"],
       "checks": [{
-        "http": "http://node-exporter:9100/metrics",
+        "http": "http://prometheus.magedu.com:9100/metrics",
         "interval": "5s"
       }]
     },
