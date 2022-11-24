@@ -1,0 +1,5 @@
+- targets:
+  - http://www.magedu.com
+  - http://www.google.com
+  labels:
+    app: blackbox

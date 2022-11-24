@@ -1,0 +1,39 @@
+groups:
+- name: example
+  rules:
+
+  - alert: service_down
+    expr: up == 0
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 30 seconds."
+
+  - alert: high_load
+    expr: node_load1 > 0.6
+    for: 30s
+    labels:
+      severity: warning
+    annotations:
+      summary: "Instance {{ $labels.instance }} under high load"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+
+  - alert: high_load
+    expr: node_load1 > 0.9
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Instance {{ $labels.instance }} under high load"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+
+  - alert: site_down
+    expr: probe_success < 1
+    for: 30s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Site Down: {{$labels.instance}}"
+      description: "Site Down: {{$labels.instance}} for more than 30 seconds"
