@@ -1,0 +1,72 @@
+version: '3.6'
+
+networks:
+  vm_net:
+    driver: bridge
+
+volumes:
+  strgdata-1: {}
+  strgdata-2: {}
+  grafanadata: {}
+
+services:
+  vmstorage-1:
+    container_name: vmstorage-1
+    image: victoriametrics/vmstorage:v1.83.1-cluster
+    ports:
+      - 8482
+      - 8400
+      - 8401
+    volumes:
+      - strgdata-1:/storage
+    networks:
+      - vm_net
+    command:
+      - '--storageDataPath=/storage'
+    restart: always
+
+  vmstorage-2:
+    container_name: vmstorage-2
+    image: victoriametrics/vmstorage:v1.83.1-cluster
+    networks:
+      - vm_net
+    ports:
+      - 8482
+      - 8400
+      - 8401
+    volumes:
+      - strgdata-2:/storage
+    command:
+      - '--storageDataPath=/storage'
+    restart: always
+
+  vminsert:
+    container_name: vminsert
+    image: victoriametrics/vminsert:v1.83.1-cluster
+    depends_on:
+      - "vmstorage-1"
+      - "vmstorage-2"
+    command:
+      - '--storageNode=vmstorage-1:8400'
+      - '--storageNode=vmstorage-2:8400'
+    ports:
+      - 8480:8480
+    networks:
+      - vm_net
+    restart: always
+
+  vmselect:
+    container_name: vmselect
+    image: victoriametrics/vmselect:v1.83.1-cluster
+    depends_on:
+      - "vmstorage-1"
+      - "vmstorage-2"
+    command:
+      - '--storageNode=vmstorage-1:8401'
+      - '--storageNode=vmstorage-2:8401'
+      #- '--vmalert.proxyURL=http://vmalert:8880'
+    networks:
+      - vm_net
+    ports:
+      - 8481:8481
+    restart: always

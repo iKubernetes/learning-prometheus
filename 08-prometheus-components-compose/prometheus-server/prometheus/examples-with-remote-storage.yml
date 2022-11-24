@@ -113,3 +113,9 @@ scrape_configs:
       tags:
       - "alertmanager"
       refresh_interval: 1m 
+
+remote_write:    # 远程写入到远程 VM 存储
+  - url: http://vminsert.magedu.com:8480/insert/0/prometheus
+
+remote_read:
+  - url: http://vmselect.magedu.com:8481/select/0/prometheus

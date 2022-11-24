@@ -2,7 +2,7 @@
 {{- if gt (len .Alerts.Firing) 0 -}}
 {{- range $index, $alert := .Alerts -}}
 {{- if eq $index 0 }}
-========= 监控报警 =========  
+========= 监控告警 =========  
 告警状态：{{   .Status }}  
 告警级别：{{ .Labels.severity }}  
 告警类型：{{ $alert.Labels.alertname }}  
@@ -11,7 +11,7 @@
 告警详情: {{ $alert.Annotations.message }}{{ $alert.Annotations.description}}  
 触发阈值：{{ .Annotations.value }}  
 故障时间: {{ ($alert.StartsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}  
-========= = end =  =========  
+=========== End ===========  
 {{- end }}
 {{- end }}
 {{- end }}
@@ -19,7 +19,7 @@
 {{- if gt (len .Alerts.Resolved) 0 -}}
 {{- range $index, $alert := .Alerts -}}
 {{- if eq $index 0 }}
-========= 异常恢复 =========  
+========= 故障恢复 =========  
 告警类型：{{ .Labels.alertname }}  
 告警状态：{{   .Status }}  
 告警主题: {{ $alert.Annotations.summary }}  
@@ -29,7 +29,7 @@
 {{- if gt (len $alert.Labels.instance) 0 }}  
 实例信息: {{ $alert.Labels.instance }}  
 {{- end }}  
-========= = end =  =========  
+=========== End ===========  
 {{- end }}
 {{- end }}
 {{- end }}

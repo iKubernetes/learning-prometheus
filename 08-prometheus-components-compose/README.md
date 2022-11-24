@@ -87,9 +87,15 @@ docker-compose up -d
 #### 启动tomcat
 
 ```bash
-cd tomcat/
+cd tomcat-and-metrics/
 docker-compose build
 docker-compose up -d
 ```
 
 #### 启动Blackbox Exporter
+
+...
+
+#### 启用AlertManager
+
+...

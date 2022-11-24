@@ -24,7 +24,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.listen-address=0.0.0.0:9094'
       - '--cluster.peer-timeout=15s'
 
   alertmanager02:
@@ -39,7 +39,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.listen-address=0.0.0.0:9094'
       - '--cluster.peer-timeout=15s'
 
   alertmanager03:
@@ -54,7 +54,7 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.listen-address=0.0.0.0:9094'
       - '--cluster.peer-timeout=15s'
 
   prometheus-webhook-dingtalk:
