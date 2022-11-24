@@ -1,0 +1,65 @@
+global:
+    resolve_timeout: 1m
+    smtp_smarthost: 'smtp.qq.com:465'
+    smtp_from: 'ikubernetes@qq.com'
+    smtp_auth_username: 'ikubernetes@qq.com'
+    smtp_auth_password: 'ioojgoqmgybfbgfg'
+    smtp_hello: '@qq.com'
+    smtp_require_tls: false
+
+route:
+    # The labels by which incoming alerts are grouped together. For example,
+    # multiple alerts coming in for job=mysqld-exporter and alertname=mysql_down would
+    # be batched into a single group.
+    group_by: ['job', 'alertname'] 
+
+    # When a new group of alerts is created by an incoming alert, wait at
+    # least 'group_wait' to send the initial notification.
+    # This way ensures that you get multiple alerts for the same group that start
+    # firing shortly after another are batched together on the first notification.
+    group_wait: 10s
+
+    # When the first notification was sent, wait 'group_interval' to send a batch
+    # of new alerts that started firing for that group.
+    group_interval: 10s
+
+    # If an alert has successfully been sent, wait 'repeat_interval' to resend them.
+    repeat_interval: 5m
+
+    receiver: team-devops-dingtalk
+    #receiver: team-devops-email
+    #receiver: team-devops-wechat
+
+templates:
+  - '/etc/alertmanager/email_template.tmpl'
+  - '/etc/alertmanager/wechat_template.tmpl'
+
+ # 定义接收者
+receivers:
+- name: 'team-devops-email'
+  email_configs:
+    - to: 'mage@magedu.com'
+      headers:
+        subject: "{{ .Status | toUpper }} {{ .CommonLabels.env }}:{{ .CommonLabels.cluster }} {{ .CommonLabels.alertname }}"
+      html: '{{ template "email.default.html" . }}'
+      send_resolved: true 
+
+- name: 'team-devops-wechat'
+  wechat_configs:
+    - corp_id: ww4c893118fbf4d07c 
+      to_user: '@all'
+      agent_id: 1000008
+      api_secret: WTepmmaqxbBOeTQOuxa0Olzov_hSEWsZWrPX1k6opMk
+      send_resolved: true
+
+- name: 'team-devops-dingtalk'
+  webhook_configs:
+  - url: http://prometheus-webhook-dingtalk:8060/dingtalk/webhook1/send             
+    send_resolved: true
+
+inhibit_rules: 
+  - source_match: 
+     severity: 'critical' 
+    target_match: 
+     severity: 'warning' 
+    equal: ['alertname', 'job']

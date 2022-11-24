@@ -1,0 +1,71 @@
+version: '3.6'
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.70.0/24
+
+volumes:
+  alertmanager01_data: {}
+  alertmanager02_data: {}
+  alertmanager03_data: {}
+
+services:
+  alertmanager01:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+      - alertmanager01_data:/alertmanager
+    networks:
+      - monitoring
+    ports:
+      - 9093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.peer-timeout=15s'
+
+  alertmanager02:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+      - alertmanager02_data:/alertmanager
+    networks:
+      - monitoring
+    ports:
+      - 19093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.peer-timeout=15s'
+
+  alertmanager03:
+    image: prom/alertmanager:v0.24.0
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+      - alertmanager03_data:/alertmanager
+    networks:
+      - monitoring
+    ports:
+      - 29093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--cluster.listen-address="0.0.0.0:9094"'
+      - '--cluster.peer-timeout=15s'
+
+  prometheus-webhook-dingtalk:
+    image: timonwong/prometheus-webhook-dingtalk:v2.1.0
+    hostname: dingtalk.magedu.com
+    volumes:
+      - ./dingtalk/:/etc/prometheus-webhook-dingtalk/
+    #command:
+      #- --config.file=config.yml
+      #- --config.file=/etc/prometheus-webhook-dingtalk/config-with-template.yml
+    networks:
+      - monitoring
+    ports:
+      - 8060:8060
