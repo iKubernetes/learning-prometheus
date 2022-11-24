@@ -14,9 +14,8 @@ networks:
         - subnet: 172.31.5.0/24
 
 services:
-
   prometheus:
-    image: prom/prometheus:v2.40.1
+    image: prom/prometheus:v2.40.2
     hostname: prometheus.magedu.com
     volumes:
       - ./prometheus/:/etc/prometheus/

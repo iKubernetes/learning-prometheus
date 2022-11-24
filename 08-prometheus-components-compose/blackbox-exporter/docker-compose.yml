@@ -11,9 +11,9 @@ services:
   blackbox_exporter:
     image: prom/blackbox-exporter:v0.22.0
     volumes:
-      - ./blackboxexporter/:/etc/blackboxexporter/
+      - ./configs/:/etc/blackboxexporter/
     command:
-      - '--config.file=/etc/blackboxexporter/config.yml'
+      - '--config.file=/etc/blackboxexporter/blackbox.yml'
     networks:
       - monitoring
     ports:

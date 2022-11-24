@@ -24,7 +24,7 @@ route:
     group_interval: 10s
 
     # If an alert has successfully been sent, wait 'repeat_interval' to resend them.
-    repeat_interval: 30m
+    repeat_interval: 5m
 
     receiver: team-devops-dingtalk
     #receiver: wechat
