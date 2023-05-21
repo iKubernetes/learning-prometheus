@@ -16,7 +16,7 @@ networks:
 services:
 
   prometheus:
-    image: prom/prometheus:v2.40.2
+    image: prom/prometheus:v2.44.0
     hostname: prometheus.magedu.com
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -56,7 +56,7 @@ services:
     command: ["consul","agent","-dev","-bootstrap","-config-dir","/consul/config","-data-dir","/consul/data","-ui","-log-level","INFO","-bind","127.0.0.1","-client","0.0.0.0"]
 
   node-exporter:
-    image: prom/node-exporter:v1.4.0
+    image: node-exporter:v1.5.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -156,7 +156,7 @@ services:
       TZ: Asia/Shanghai
 
   blackbox_exporter:
-    image: prom/blackbox-exporter:v0.22.0
+    image: prom/blackbox-exporter:v0.24.0
     volumes:
       - ./blackboxexporter/:/etc/blackboxexporter/
     command:
@@ -167,7 +167,7 @@ services:
       - 9115:9115
 
   grafana:
-    image: grafana/grafana:9.2.5
+    image: grafana/grafana:9.5.2
     depends_on:
       - prometheus
     ports:

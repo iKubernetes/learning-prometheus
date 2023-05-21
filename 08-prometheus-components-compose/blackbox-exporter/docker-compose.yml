@@ -9,7 +9,7 @@ networks:
 
 services:
   blackbox_exporter:
-    image: prom/blackbox-exporter:v0.22.0
+    image: prom/blackbox-exporter:v0.24.0
     volumes:
       - ./configs/:/etc/blackboxexporter/
     command:

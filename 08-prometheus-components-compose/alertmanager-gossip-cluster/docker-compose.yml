@@ -13,7 +13,7 @@ volumes:
 
 services:
   alertmanager01:
-    image: prom/alertmanager:v0.24.0
+    image: prom/alertmanager:v0.25.0
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager01_data:/alertmanager
@@ -28,7 +28,7 @@ services:
       - '--cluster.peer-timeout=15s'
 
   alertmanager02:
-    image: prom/alertmanager:v0.24.0
+    image: prom/alertmanager:v0.25.0
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager02_data:/alertmanager
@@ -43,7 +43,7 @@ services:
       - '--cluster.peer-timeout=15s'
 
   alertmanager03:
-    image: prom/alertmanager:v0.24.0
+    image: prom/alertmanager:v0.25.0
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - alertmanager03_data:/alertmanager

@@ -8,7 +8,7 @@ networks:
 
 services:
   alertmanager:
-    image: prom/alertmanager:v0.24.0
+    image: prom/alertmanager:v0.25.0
     volumes:
       - ./alertmanager/:/etc/alertmanager/
     networks:
