@@ -10,7 +10,7 @@ networks:
 services:
 
   prometheus:
-    image: prom/prometheus:v2.40.2
+    image: prom/prometheus:v2.44.0
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -31,7 +31,7 @@ services:
     restart: always
 
   node-exporter:
-    image: prom/node-exporter:v1.4.0
+    image: prom/node-exporter:v1.5.0
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
