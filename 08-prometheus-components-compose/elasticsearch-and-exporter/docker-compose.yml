@@ -1,0 +1,102 @@
+version: '3.6'
+
+volumes:
+  elasticsearch-data:
+    driver: local
+  kibana-data:
+    driver: local
+
+networks:
+  elastic:
+
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    image: ikubernetes/elasticsearch:7.17.7-ik
+    environment: 
+    - CLI_JAVA_OPTS='-Xms2g -Xmx2g'
+    - bootstrap.memory_lock=true
+    - discovery.type=single-node
+    - xpack.security.enabled=false
+    # for 8.x
+    #- xpack.security.enrollment.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:    
+      resources:
+          limits:
+            cpus: '2.0'
+
+  kibana:
+    image: kibana:7.17.7
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+    deploy:    
+      resources:
+          limits:
+            cpus: '1.0'
+
+  fluent-bit:
+    image: fluent/fluent-bit:2.1.8
+    container_name: fluent-bit
+    command:
+      - /fluent-bit/bin/fluent-bit
+      - --config=/etc/fluent-bit/fluent-bit.conf
+    environment:
+      - FLB_ES_HOST=elasticsearch
+      - FLB_ES_PORT=9200
+    ports:
+      #- 24244:24244
+      - 2020:2020
+    volumes:
+      - ./fluent-bit-conf/:/etc/fluent-bit/:ro
+      - /var/lib/docker/containers/:/var/lib/docker/containers/
+      - /var/log/:/var/log/
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+    deploy:    
+      resources:
+          limits:
+            cpus: '1.0'
+    #logging:
+    #  driver: fluentd
+    #  options:
+    #    tag: efk.fluent-bit
+
+  elasticsearch-exporter:
+    image: prometheuscommunity/elasticsearch-exporter:v1.6.0
+    container_name: elasticsearch-exporter
+    command:
+     - '--es.uri=http://elasticsearch:9200'
+    ports:
+    - "9114:9114"
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
+    deploy:    
+      resources:
+          limits:
+            cpus: '1.0'

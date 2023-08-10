@@ -1,0 +1,9 @@
+  # elastic
+  # elasticsearch-exporter
+  - job_name: 'elastic-exporter'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "elastic-exporter"
+      refresh_interval: 2m
+

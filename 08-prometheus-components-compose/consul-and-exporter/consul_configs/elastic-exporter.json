@@ -1,0 +1,15 @@
+{
+  "services": [
+    {
+      "id": "elastic-exporter",
+      "name": "elastic-exporter",
+      "address": "elastic.magedu.com",
+      "port": 9114,
+      "tags": ["elastic-exporter"],
+      "checks": [{
+        "http": "http://elastic.magedu.com:9114/metrics",
+        "interval": "5s"
+      }]
+    }
+  ]
+}
