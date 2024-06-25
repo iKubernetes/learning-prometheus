@@ -14,9 +14,9 @@
 
 基于Consul完成服务发现，但相关的节点的信息以静态形式进行添加，以简化测试过程；相关的节点信息保存于consul_configs目录下json格式的配置文件中
 
-### Grafana Job
+### 创建Job
 
-为发现的grafana定义的一个专用Job示例，发现时使用的过滤标签为“grafana”。
+下面的示例，创建了一个job，它从consul中发现标签为“grafana”的服务，并将其自动添加为target。
 
 ```yaml
   # grafana
@@ -28,23 +28,49 @@
       refresh_interval: 2m 
 ```
 
+下面的示例，创建了一个job，它从consul中发现标签为“consul-exporter”的服务，并将其自动添加为target。
+
+```yaml
+  # consul
+  - job_name: 'consul'
+    consul_sd_configs:
+    - server: "consul:8500"
+      tags:
+      - "consul-exporter"
+      refresh_interval: 2m 
+```
+
 ### 动态注册服务示例
 
-要注册的grafana配置示例
+示例1：下面的配置能够将grafana注册到consul上，相关的内容保存于grafana.json文件中。
 
 ```json
 {
-  "service": {
-    "id": "grafana",
+    "id": "grafana01",
     "name": "grafana01",
     "address": "grafana",
-    "port": 9100,
+    "port": 3000,
     "tags": ["grafana"],
     "checks": [{
       "http": "http://grafana:3000/metrics",
       "interval": "5s"
     }]
-  }
+}
+```
+
+示例2：将consul-exporter注册到consul上，从而让prometheus可以监控consul。相关的内容保存于consul-exporter.json文件中。
+
+```json
+{
+      "id": "consul-exporter",
+      "name": "consul-exporter",
+      "address": "172.29.2.12",
+      "port": 9107,
+      "tags": ["consul-exporter"],
+      "checks": [{
+        "http": "http://172.29.2.12:9107/metrics",
+        "interval": "5s"
+      }]
 }
 ```
 
@@ -52,6 +78,7 @@
 
 ```bash
 curl -XPUT --data @grafana.json http://consul:8500/v1/agent/service/register
+curl -XPUT --data @consul-exporter.json http://consul:8500/v1/agent/service/register
 ```
 
 
