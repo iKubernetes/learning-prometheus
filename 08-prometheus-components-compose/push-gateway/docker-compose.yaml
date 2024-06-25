@@ -1,0 +1,19 @@
+version: "3.6"
+
+networks:
+  monitoring:
+    driver: bridge
+
+services:
+  pushgateway:
+    image: prom/pushgateway:v1.9.0
+    hostname: pushgateway.magedu.com
+    #container_name: pushgateway.magedu.com
+    command:
+      - '--web.listen-address=:9091'
+      - '--push.disable-consistency-check'
+      - '--persistence.interval=5m'
+    ports:
+      - 9091:9091
+    networks:
+      - monitoring
