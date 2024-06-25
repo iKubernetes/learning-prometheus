@@ -9,6 +9,7 @@ scrape_configs:
 - job_name: pushgateway
   honor_labels: false
   static_configs:
+  # 注意修改下面的push gateway主机的地址；
   - targets: ['pushgw.magedu.com:9091']
     labels:
       pushgateway_instance: metricfire
@@ -24,8 +25,7 @@ cat <<EOF | curl --data-binary @- http://localhost:9091/metrics/job/metricfire/i
 my_test_metric 77
 # TYPE awesomeness_total counter
 # HELP awesomeness_total How awesome is this article.
-awesomeness_total 
-987654321
+awesomeness_total 987654321
 EOF
 ```
 
